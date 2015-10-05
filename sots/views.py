@@ -1,4 +1,5 @@
 import datetime
+import json
 
 from django.shortcuts import render
 from django.db.models import Count, Q
@@ -64,7 +65,10 @@ class SOTSRecordView(APIView):
         # If round for individuals is less, then we have to fetch individual records so one round
         # can be finished.
         if family_current_round > indv_current_round and (not records_per_family.exists() and indv_records.exists()):
-            fetch_family_records = False
+            pass
+         
+        # TODO: put it in globalsettings   
+        fetch_family_records = False
     
         if fetch_family_records:          
             for record in records_per_family:
@@ -96,11 +100,17 @@ class SOTSRecordUpdate(APIView):
         current_round = 1
         print "payload *** ", payload
         print "record_id *** ", record_id
+        try:
+            payload = json.loads(payload)
+        except Exception, error:
+            print "exception", error
+        data_set = payload.get('data')
         # TODO: record_id should be in redis (locked state)
         family_records = SOTSCallRecord.objects.filter(familyid=record_id)
         if family_records.exists():
-            for data in payload:
-                indv_record = family_records.filter(ssrecid=data.get('unit_id'))
+            
+            for data in data_set:
+                indv_record = family_records.filter(ssrecid=data.get('ssrecid'))
                 current_round = data.get('current_round')
                 call_status_dict = get_round_info_dict(data)
                 updated_record = indv_record.update(**call_status_dict)
@@ -120,8 +130,9 @@ class SOTSRecordUpdate(APIView):
 
         else:
             indv_record = SOTSCallRecord.objects.filter(ssrecid=record_id)
+            print data_set
             if indv_record.exists():
-                for data in payload:
+                for data in data_set:
                     current_round = data.get('current_round')
                     call_status_dict = get_round_info_dict(data)
                     updated_record = indv_record.update(**call_status_dict)
@@ -139,7 +150,7 @@ class SOTSRecordUpdate(APIView):
                               }
                 indv_record.update(**round_info)
 
-        return Response({'data': 'Records with id %s updated successfully' % record_id})
+        return Response({'data': {'message': 'Records with id %s updated successfully' % record_id}})
 
 
 class SOTSRecordLock(APIView):
@@ -159,4 +170,4 @@ class SOTSRecordLock(APIView):
                 
                 indv_record.update(locked=True)
 
-        return Response({'data': 'Records locked for id %s' % record_id})
+        return Response({'data': {'message': 'Records locked for id %s' % record_id}})

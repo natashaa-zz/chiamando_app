@@ -1,5 +1,6 @@
 import datetime
 import json
+import logging
 
 from django.shortcuts import render
 from django.db.models import Count, Q
@@ -16,7 +17,7 @@ from .serializers import SOTSAdminSerializer
 from .utils import get_round_info_dict
 from . import values_list
 
-
+log = logging.getLogger('rssb')
 class ObtainAuthTokenModified(ObtainAuthToken):
     def post(self, request):
         serializer = self.serializer_class(data=request.DATA)
@@ -48,6 +49,7 @@ class SOTSRecordView(APIView):
         data_set = []
         data = {}
         # Family Records
+        log.debug('in get request')
         for round_number in xrange(1,4):
             records_per_family = SOTSCallRecord.objects.exclude(familyid=0).filter(**common_filters)
             if records_per_family.filter(current_round=round_number).exists():

@@ -34,13 +34,13 @@ class SOTSCallRecord(models.Model):
     firstname = models.CharField(max_length=50,)#text
     middlename = models.CharField(max_length=50, null=True, blank=True)#text
     lastname = models.CharField(max_length=50, null=True, blank=True)#text
-    mobile1 = models.BigIntegerField()#number
-    mobile2 = models.BigIntegerField(null=True, blank=True)#number
-    landline = models.BigIntegerField(null=True, blank=True)#number
-    emergency_contact1_name = models.CharField(max_length=50)#text
-    emergency_contact1 = models.BigIntegerField()#number
-    emergency_contact2_name = models.CharField(max_length=50)#text
-    emergency_contact2 = models.BigIntegerField()#number
+    mobile1 = models.CharField(max_length=15, null=True, blank=True)
+    mobile2 = models.CharField(max_length=15, null=True, blank=True)
+    landline = models.CharField(max_length=15, null=True, blank=True)
+    emergency_contact1_name = models.CharField(max_length=50, null=True, blank=True)#text
+    emergency_contact1 = models.CharField(max_length=15, null=True, blank=True)
+    emergency_contact2_name = models.CharField(max_length=50, null=True, blank=True)#text
+    emergency_contact2 = models.CharField(max_length=15, null=True, blank=True)
     locked = models.BooleanField(default=False, db_index=True)#boolean
     overall_status = models.CharField(max_length=4, default='NI', choices=STATUS_CHOICES, db_index=True)
     current_round = models.IntegerField(default=1)

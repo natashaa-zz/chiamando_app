@@ -49,7 +49,7 @@ class SOTSRecordView(APIView):
         data_set = []
         data = {}
         # Family Records
-        log.debug('in get request')
+        log.debug('Fetch record initiated by user %s' % request.user.username)
         for round_number in xrange(1,4):
             records_per_family = SOTSCallRecord.objects.exclude(familyid=0).filter(**common_filters)
             if records_per_family.filter(current_round=round_number).exists():
@@ -88,6 +88,7 @@ class SOTSRecordView(APIView):
             record.update({'head': True})
             data_set.append(record)
         print data_set
+        log.debug('Fetch request by user %s, data set - %s' % (request.user.username, data_set))
         data['data'] = data_set
         return Response(data)
 

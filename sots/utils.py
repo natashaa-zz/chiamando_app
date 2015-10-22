@@ -1,5 +1,6 @@
 from .models import SOTSCallRecord
 
+log = logging.getLogger('rssb')
 
 def get_round_info_dict(data_dict):
     call_status_dict = {}
@@ -11,9 +12,9 @@ def get_round_info_dict(data_dict):
     old_remarks = indv_record[0].remarks if indv_record[0].remarks else ''
     new_remarks = 'Round : %s Comments: %s' % (current_round, data_dict.get('remarks'))
     if old_remarks:
-        new_remarks = '%s , %s' %(old_remarks, new_remarks)
-    else:
-        new_remarks = old_remarks
+        new_remarks = '%s , %s' % (old_remarks, new_remarks)
+
+    log.debug('Remarks %s' % new_remarks)
     
     call_status_dict.update({
         'round%d_mobile1_status' % current_round: data_dict.get('round%d_mobile1_status' % current_round),

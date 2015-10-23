@@ -8,8 +8,19 @@ class SOTSadminSite(admin.ModelAdmin):
     list_display = ('firstname', 'lastname', 'username')
 
 class SOTSCallRecordAdmin(admin.ModelAdmin):
-    list_display = ('ssrecid', 'familyid', 'firstname', 'middlename', 'lastname', 'contacted_number', 'overall_status')
-
+    list_display = ('ssrecid', 'familyid', 'firstname', 'middlename', 'lastname',
+                    'contacted_number', 'overall_status', 'locked')
+    list_filter = (
+        'locked', 'overall_status', 'current_round',
+        'round1_mobile1_status', 'round1_mobile2_status', 'round1_landline_status',
+        'round1_emergency_contact1_status', 'round1_emergency_contact2_status',
+        'round2_mobile1_status', 'round2_mobile2_status', 'round2_landline_status',
+        'round2_emergency_contact1_status', 'round2_emergency_contact2_status',
+        'round3_mobile1_status', 'round3_mobile2_status', 'round3_landline_status',
+        'round3_emergency_contact1_status', 'round3_emergency_contact2_status',
+    )
+    search_fields = ('ssrecid', 'firstname', 'lastname', 'mobile1', 'mobile2',
+                     'landline', 'emergency_contact1', 'emergency_contact2')
     fieldsets = (
         ('User Info', {
             'fields': 
@@ -31,6 +42,7 @@ class SOTSCallRecordAdmin(admin.ModelAdmin):
             'fields':
                 (
                     ('round1_mobile1_status', 'round1_mobile2_status', 'round1_landline_status'),
+                    ('round1_emergency_contact1_status', 'round1_emergency_contact2_status'),
                     ('round1_timestamp', 'round1_sotsuser')
                 )
         }),
@@ -38,6 +50,7 @@ class SOTSCallRecordAdmin(admin.ModelAdmin):
             'fields':
                 (
                     ('round2_mobile1_status', 'round2_mobile2_status', 'round2_landline_status'),
+                    ('round2_emergency_contact1_status', 'round2_emergency_contact2_status'),
                     ('round2_timestamp', 'round2_sotsuser')
                 )
         }),
@@ -54,13 +67,16 @@ class SOTSCallRecordAdmin(admin.ModelAdmin):
     def save_model(self, request, obj, form, change):
         #import pdb;pdb.set_trace()
         status_informed = (obj.round1_mobile1_status == 'I' or obj.round1_mobile2_status == 'I'
+                           or obj.round1_emergency_contact1_status == 'I' or obj.round1_emergency_contact2_status == 'I'
                            or obj.round1_landline_status == 'I' or obj.round2_mobile1_status == 'I'
                            or obj.round2_mobile2_status == 'I' or obj.round2_landline_status == 'I'
+                           or obj.round2_emergency_contact1_status == 'I' or obj.round2_emergency_contact2_status == 'I'
                            or obj.round3_mobile1_status == 'I' or obj.round3_mobile2_status == 'I'
+                           or obj.round3_emergency_contact1_status == 'I' or obj.round3_emergency_contact2_status == 'I'
                            or obj.round3_landline_status == 'I' or obj.round3_emergency_contact1_status == 'I'
                            or obj.round3_emergency_contact1_status == 'I')
 
-        print "************", status_informed
+        
         #import pdb;pdb.set_trace()
         if obj.familyid and status_informed:
             obj.overall_status = 'I'

@@ -1,5 +1,6 @@
 from django.db import models
 from django.dispatch import receiver
+from django.contrib.auth.models import User
 
 from .signals import update_callrecord
 
@@ -54,7 +55,7 @@ class SOTSCallRecord(models.Model):
                                               db_index=True)
     round1_emergency_contact2_status = models.CharField(max_length=4, choices=CALL_STATUS, null=True, blank=True,
                                               db_index=True)
-    round1_sotsuser = models.ForeignKey(SOTSadmin, null=True, blank=True, #on_delete=models.SET_NULL,
+    round1_sotsuser = models.ForeignKey(User, null=True, blank=True, #on_delete=models.SET_NULL,
                                         related_name='round1_sotsuser')#foreignkey to sotsadmin
     round1_timestamp = models.DateTimeField(null=True, blank=True)#datetime
     round2_mobile1_status = models.CharField(max_length=4, choices=CALL_STATUS, null=True, blank=True,
@@ -67,7 +68,7 @@ class SOTSCallRecord(models.Model):
                                               db_index=True)#choice
     round2_emergency_contact2_status = models.CharField(max_length=4, choices=CALL_STATUS, null=True, blank=True,
                                               db_index=True)#choice
-    round2_sotsuser = models.ForeignKey(SOTSadmin, null=True, blank=True, on_delete=models.SET_NULL,
+    round2_sotsuser = models.ForeignKey(User, null=True, blank=True, on_delete=models.SET_NULL,
                                         related_name='round2_sotsuser')#foreignkey to sotsadmin
     round2_timestamp = models.DateTimeField(null=True, blank=True)#datetime
     round3_mobile1_status = models.CharField(max_length=4, choices=CALL_STATUS, null=True, blank=True,
@@ -80,7 +81,7 @@ class SOTSCallRecord(models.Model):
                                                         db_index=True)#choice
     round3_emergency_contact2_status = models.CharField(max_length=4, choices=CALL_STATUS, null=True, blank=True,
                                                         db_index=True)#choice
-    round3_sotsuser = models.ForeignKey(SOTSadmin, null=True, blank=True, on_delete=models.SET_NULL,
+    round3_sotsuser = models.ForeignKey(User, null=True, blank=True, on_delete=models.SET_NULL,
                                         related_name='round3_sotsuser')#foreignkey to sotsadmin
     round3_timestamp = models.DateTimeField(null=True, blank=True)#datetime
     contacted_number = models.BigIntegerField(null=True, blank=True)#number

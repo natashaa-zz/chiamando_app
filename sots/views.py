@@ -25,7 +25,7 @@ class ObtainAuthTokenModified(ObtainAuthToken):
         serializer = self.serializer_class(data=request.DATA)
         if serializer.is_valid():
             user = serializer.validated_data['user']
-            token, created =  Token.objects.get_or_create(user=)
+            token, created =  Token.objects.get_or_create(user=user)
 
             log.debug('User login successfull for user %s' % user)
             return Response({'data': {'token': token.key}})
@@ -49,8 +49,8 @@ class SOTSRecordView(APIView):
     def get(self, request, *args, **kwargs):
         
         common_filters = {'locked': False, 'overall_status': NOT_INFORMED}
-        family_current_round = 0
-        indv_current_round = 0
+        family_current_round = 1
+        #indv_current_round = 1
         fetch_family_records = True
         data_set = []
         data = {}
@@ -65,15 +65,40 @@ class SOTSRecordView(APIView):
                 break
 
         # Individual Records
-        for round_number in xrange(1,4):
-            records = SOTSCallRecord.objects.filter(familyid=0).filter(**common_filters)
-            indv_records = records.filter(current_round=round_number)
-            if indv_records.exists():
-                indv_current_round = round_number
-                break
+        # for round_number in xrange(1,4):
+        #     records = SOTSCallRecord.objects.filter(familyid=0).filter(**common_filters).order_by('ssrecid')
+        #     round_user = 'round%s_user' % round_number
+        #     custom = {'round%s_sotsuser__isnull' % round_number: True}
+        #     indv_records = records.filter(current_round=round_number).filter(**custom)
+        #     if indv_records.exists():
+        #         indv_current_round = round_number
+        #         break
 
-        log.debug('request method - %s, url - %s, user - %s, round %s' % request.method, request.url, username,
-                   current_round)
+        records = SOTSCallRecord.objects.filter(familyid=0).filter(**common_filters).order_by('ssrecid')
+        round_1 = 1
+        round_2 = 2
+        round_3 = 3
+        records_round1 = records.filter(current_round=round_1)
+        records_round2 = records.filter(current_round=round_2)
+        records_round3 = records.filter(current_round=round_3)
+
+        if records_round1.exists():
+            log.debug('round 1 records exists ')
+            indv_records = records_round1
+            indv_current_round = round_1
+        elif records_round2.exists():
+            log.debug('round 2 records exists')
+            indv_records = records_round2
+            indv_current_round = round_2
+        elif records_round3.exists():
+            log.debug('round 3 records exists ')
+            indv_records = records_round3
+            indv_current_round = round_3
+        else:
+            log.debug('No records found, all processed ')
+            return Response({'data': []})
+
+        log.debug('get request - user - %s, round %s' % (username, indv_current_round))
         # If round for individuals is less, then we have to fetch individual records so one round
         # can be finished.
         if family_current_round > indv_current_round and (not records_per_family.exists() and indv_records.exists()):
@@ -93,33 +118,37 @@ class SOTSRecordView(APIView):
                     record.update({'head': False})
                 data_set.append(record)
         elif indv_records.exists():
-            records = records.values(*values_list)
-            record = records[0]
-            record.update({'head': True})
-            data_set.append(record)
-        log.debug('Returning data set for request - %s, %s, round %s, user %s, data set %s' % request.method,
-                  request.url, current_round, username, data_set)
-        data['data'] = data_set
+            record_result = indv_records.values(*values_list)
+            record_result = record_result[0]
+            record_result.update({'head': True})
+
+            data_set.append(record_result)
+            
+        log.debug('Returning data set for get, round %s, user %s, data set %s' % (indv_current_round,
+                   username, data_set))
+        data['data'] = data_set#json.dumps(data_set)
+
         return Response(data)
 
 
 class SOTSRecordUpdate(APIView):
     renderer_classes = (JSONRenderer,)
+    permission_classes = (IsAuthenticated,)
 
     def put(self, request, *args, **kwargs):
         record_id = kwargs.get('record_id')
         payload = request.data.get('data')
         contacted_number = ''
         
-        usrename = request.user.username
-        log.debug('Update request initiated for record %s by user %s, payload %s' % (record_id, username, payload))
+        username = request.user.username
+        log.debug('Update request initiated for record %s by user %s, payload %s' % (record_id,
+                   username, payload))
         
-        print "record_id *** ", record_id
         try:
             payload = json.loads(payload)
         except Exception, error:
             log.error('Error loading the payload for record %s error %s, username %s, payload %s' % (record_id,
-                       error, username, payload)
+                       error, username, payload))
         data_set = payload.get('data')
         # TODO: uncomment for family records and user exists()
         family_records = None #SOTSCallRecord.objects.filter(familyid=record_id)
@@ -137,7 +166,7 @@ class SOTSRecordUpdate(APIView):
                 family_records.update(overall_status=INFORMED)
 
             round_info = {'round%d_timestamp' % current_round: datetime.datetime.now(),
-                          'round%d_sotsuser' % current_round: request.user.username,
+                          'round%d_sotsuser' % current_round: request.user,
                           'current_round': current_round + 1,
                           'locked': False
                           }
@@ -148,7 +177,8 @@ class SOTSRecordUpdate(APIView):
             indv_record = SOTSCallRecord.objects.filter(ssrecid=record_id, locked=True)
             
             if indv_record.exists():
-                log.debug('Found the indv record for update request payload %s, username %s' % (data_set, username))
+                log.debug('Found the indv record for update request payload %s, username %s' % (data_set,
+                          username))
                 for data in data_set:
                     current_round = data.get('current_round')
                     call_status_dict = get_round_info_dict(data)
@@ -161,16 +191,17 @@ class SOTSRecordUpdate(APIView):
                         contacted_number = data.get('contacted_number')
 
                 if contacted_number:
-                    log.debug('Updating the record status as informed payload %s, username %s' %(data_set, username))
+                    log.debug('Updating the record status as informed payload %s, username %s' %(data_set,
+                              username))
                     indv_record.update(overall_status=INFORMED)
                     
                 round_info = {'round%d_timestamp' % current_round: datetime.datetime.now(),
-                              'round%d_sotsuser' % current_round: request.user.username,
+                              'round%d_sotsuser' % current_round: request.user,
                               'current_round': current_round + 1,
                               'locked': False
                               }
-                log.debug('updating the round info for payload %s, username %s, round info %s' % (data_set, username,
-                          round_info))
+                log.debug('updating the round info for payload %s, username %s, round info %s' % (data_set,
+                          username, round_info))
                 indv_record.update(**round_info)
                 message = 'Record with id %s updated successfully' % record_id
             else:
@@ -184,10 +215,13 @@ class SOTSRecordUpdate(APIView):
 
 class SOTSRecordLock(APIView):
     renderer_classes = (JSONRenderer,)
+    permission_classes = (IsAuthenticated,)
+
 
     def put(self, request, *args, **kwargs):
         record_id = kwargs.get('record_id')
         log.debug('Lock call initiated for %s' % record_id)
+        username = request.user.username
         # TODO: uncomment this for family records and check exists() queryset
         family_records = None #SOTSCallRecord.objects.filter(familyid=record_id)
         if family_records:
@@ -202,5 +236,32 @@ class SOTSRecordLock(APIView):
             else:
                 # TODO: change the status to 404
                 message = 'Record with id %s either does not exist or is already locked' % record_id
+
+        return Response({'data': {'message': message}})
+
+
+class SOTSRecordUnLock(APIView):
+    renderer_classes = (JSONRenderer,)
+    permission_classes = (IsAuthenticated,)
+
+
+    def put(self, request, *args, **kwargs):
+        record_id = kwargs.get('record_id')
+        log.debug('Unlock call initiated for %s' % record_id)
+        username = request.user.username
+        # TODO: uncomment this for family records and check exists() queryset
+        family_records = None #SOTSCallRecord.objects.filter(familyid=record_id)
+        if family_records:
+            family_records.update(locked=False)
+
+        else:
+            indv_record = SOTSCallRecord.objects.filter(ssrecid=record_id, locked=True)
+            if indv_record.exists():
+                log.debug('unlock call successfull by username %s for record %s' % (username, record_id))
+                indv_record.update(locked=False)
+                message = 'Record unlocked for id %s' % record_id
+            else:
+                # TODO: change the status to 404
+                message = 'Record with id %s either does not exist or is already unlocked' % record_id
 
         return Response({'data': {'message': message}})

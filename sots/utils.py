@@ -1,3 +1,5 @@
+import logging
+
 from .models import SOTSCallRecord
 
 log = logging.getLogger('rssb')
@@ -10,7 +12,7 @@ def get_round_info_dict(data_dict):
     if not indv_record.exists():
         return call_status_dict
     old_remarks = indv_record[0].remarks if indv_record[0].remarks else ''
-    new_remarks = 'Round : %s Comments: %s' % (current_round, data_dict.get('remarks'))
+    new_remarks = data_dict.get('remarks')
     if old_remarks:
         new_remarks = '%s , %s' % (old_remarks, new_remarks)
 
@@ -20,6 +22,9 @@ def get_round_info_dict(data_dict):
         'round%d_mobile1_status' % current_round: data_dict.get('round%d_mobile1_status' % current_round),
         'round%d_mobile2_status' % current_round: data_dict.get('round%d_mobile2_status' % current_round),
         'round%d_landline_status' % current_round: data_dict.get('round%d_landline_status' % current_round),
+        'round%d_emergency_contact1_status' % current_round: data_dict.get('round%d_emergency_contact1_status' % current_round),
+        'round%d_emergency_contact2_status' % current_round: data_dict.get('round%d_emergency_contact2_status' % current_round),
+
         'remarks': new_remarks
     })
 

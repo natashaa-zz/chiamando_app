@@ -6,7 +6,7 @@ values_list = ['ssrecid', 'familyid', 'firstname', 'middlename', 'lastname',
                'round1_mobile1_status', 'round1_mobile2_status', 'round1_landline_status',
                'round2_mobile1_status', 'round2_mobile2_status', 'round2_landline_status',
                'round3_mobile1_status', 'round3_mobile2_status', 'round3_landline_status',
-               'round3_emergency_contact1_status', 'round3_emergency_contact1_status']
+               'round3_emergency_contact1_status', 'round3_emergency_contact1_status', 'remarks']
 
 INFORMED = 'I'
 NOT_INFORMED = 'NI'

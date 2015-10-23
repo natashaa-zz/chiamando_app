@@ -12,6 +12,10 @@ reader = csv.DictReader(open(file_name))
 headers = reader.fieldnames
 #reader = csv.reader(open(file_name,"rb"))
 
+## Delete the existing records
+
+records = SOTSCallRecord.objects.all()
+records.delete()
 for row in reader:
     #import pdb;pdb.set_trace()
     #pass

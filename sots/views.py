@@ -168,7 +168,8 @@ class SOTSRecordUpdate(APIView):
             round_info = {'round%d_timestamp' % current_round: datetime.datetime.now(),
                           'round%d_sotsuser' % current_round: request.user,
                           'current_round': current_round + 1,
-                          'locked': False
+                          'locked': False,
+                          'contacted_number': contacted_number
                           }
             family_records.update(**round_info)
                 # if we are here, it means that the status is informed, so update overall status
@@ -194,11 +195,14 @@ class SOTSRecordUpdate(APIView):
                     log.debug('Updating the record status as informed payload %s, username %s' %(data_set,
                               username))
                     indv_record.update(overall_status=INFORMED)
-                    
+                
+
+                log.debug('***************contacted_number %s*****' % contacted_number)
                 round_info = {'round%d_timestamp' % current_round: datetime.datetime.now(),
                               'round%d_sotsuser' % current_round: request.user,
                               'current_round': current_round + 1,
-                              'locked': False
+                              'locked': False,
+                              'contacted_number': contacted_number
                               }
                 log.debug('updating the round info for payload %s, username %s, round info %s' % (data_set,
                           username, round_info))

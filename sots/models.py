@@ -84,7 +84,7 @@ class SOTSCallRecord(models.Model):
     round3_sotsuser = models.ForeignKey(User, null=True, blank=True, on_delete=models.SET_NULL,
                                         related_name='round3_sotsuser')#foreignkey to sotsadmin
     round3_timestamp = models.DateTimeField(null=True, blank=True)#datetime
-    contacted_number = models.BigIntegerField(null=True, blank=True)#number
+    contacted_number = models.CharField(max_length=15, null=True, blank=True)#number
     remarks = models.TextField(null=True, blank=True)
 
     def __str__(self):

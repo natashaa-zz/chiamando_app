@@ -122,7 +122,7 @@ LOGGING = {
             'level':'DEBUG',
             'class':'logging.handlers.RotatingFileHandler',
             'filename': '%s/rssb_debug_%s.log' % (PROJECT_ROOT, os.getpid()),
-            'maxBytes': 50000,
+            'maxBytes': 1024*1024*5,
             'backupCount': 20,
             'formatter': 'standard',
         },

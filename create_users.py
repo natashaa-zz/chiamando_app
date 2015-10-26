@@ -13,7 +13,7 @@ reader = csv.reader(open(file_name,"rb"))
 
 for row in reader:
     user = User(first_name=row[0], email='%s@test.com' % row[0], is_active=True, username=row[0])
-    user.set_password('%s123' % row[0])
+    user.set_password('%s' % row[0])
     print "user %s added" % row[0]
     user.save()
 

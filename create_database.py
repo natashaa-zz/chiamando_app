@@ -1,4 +1,7 @@
 import csv
+import os
+
+os.environ['DJANGO_SETTINGS_MODULE'] = 'rssb.settings'
 
 from sots.models import SOTSCallRecord
 
@@ -17,8 +20,8 @@ headers = reader.fieldnames
 records = SOTSCallRecord.objects.all()
 records.delete()
 for row in reader:
-    #import pdb;pdb.set_trace()
-    #pass
+    if int(row.get('FamilyID')):
+	continue
     row_info = {
         'ssrecid': int(row.get('SSRecID')),
         'familyid': int(row.get('FamilyID')),

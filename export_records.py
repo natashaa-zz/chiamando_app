@@ -6,7 +6,7 @@ os.environ['DJANGO_SETTINGS_MODULE'] = 'rssb.settings'
 
 from sots.models import SOTSCallRecord
 
-file_name = '/home/natasha/Documents/records.csv'
+file_name = '/home/sotsadmin/Documents/records.csv'
 
 print file_name
 writer = csv.writer(open("temp.csv","wb"))

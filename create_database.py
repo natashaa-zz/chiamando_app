@@ -20,39 +20,41 @@ headers = reader.fieldnames
 records = SOTSCallRecord.objects.all()
 records.delete()
 for row in reader:
-    if int(row.get('FamilyID')):
-       continue
-    row_info = {
-        'ssrecid': int(row.get('SSRecID')),
-        'familyid': int(row.get('FamilyID')),
-        'firstname': row.get('SSFName'),
-        'middlename': row.get('SSMName'),
-        'lastname': row.get('SSLName'),
-        'emergency_contact1_name': row.get('EContactPersonlocal'),
-        'emergency_contact2_name': row.get('ESContactPersonlocal'),
-      
-    }
-    if int(row.get('Mobile')) and int(row.get('MobExt')):
-        row_info.update({'mobile1': '%s%s%s' % (COUNTRY_CODE, row.get('MobExt'), row.get('Mobile'))})
+    try:
+        if int(row.get('FamilyID')):
+           continue
+        row_info = {
+            'ssrecid': int(row.get('SSRecID')),
+            'familyid': int(row.get('FamilyID')),
+            'firstname': row.get('SSFName'),
+            'middlename': row.get('SSMName'),
+            'lastname': row.get('SSLName'),
+            'emergency_contact1_name': row.get('EContactPersonlocal'),
+            'emergency_contact2_name': row.get('ESContactPersonlocal'),
+          
+        }
+        if int(row.get('Mobile')) and int(row.get('MobExt')):
+            row_info.update({'mobile1': '%s%s%s' % (COUNTRY_CODE, row.get('MobExt'), row.get('Mobile'))})
 
-    if int(row.get('Mobile1')) and int(row.get('MobExt1')):
-        row_info.update({'mobile2': '%s%s%s' % (COUNTRY_CODE, row.get('MobExt1'), row.get('Mobile1'))})
+        if int(row.get('Mobile1')) and int(row.get('MobExt1')):
+            row_info.update({'mobile2': '%s%s%s' % (COUNTRY_CODE, row.get('MobExt1'), row.get('Mobile1'))})
 
-    if int(row.get('ResTel')) and int(row.get('ResTelExt')):
-        row_info.update({'landline': '%s%s%s' % (COUNTRY_CODE, row.get('ResTelExt'),
-                                                 row.get('ResTel'))})
+        if int(row.get('ResTel')) and int(row.get('ResTelExt')):
+            row_info.update({'landline': '%s%s%s' % (COUNTRY_CODE, row.get('ResTelExt'),
+                                                     row.get('ResTel'))})
 
-    if int(row.get('EContactNumber')) and int(row.get('EContactNumberExt')):
-        row_info.update({'emergency_contact1': '%s%s%s' % (COUNTRY_CODE, row.get('EContactNumberExt'),
-                                                           row.get('EContactNumber'))})
+        if int(row.get('EContactNumber')) and int(row.get('EContactNumberExt')):
+            row_info.update({'emergency_contact1': '%s%s%s' % (COUNTRY_CODE, row.get('EContactNumberExt'),
+                                                               row.get('EContactNumber'))})
 
-    if int(row.get('ESContactNumber')) and int(row.get('ESContactNumberExt')):
-        row_info.update({'emergency_contact2': '%s%s%s' % (COUNTRY_CODE, row.get('ESContactNumberExt'),
-                                                           row.get('ESContactNumber'))})
+        if int(row.get('ESContactNumber')) and int(row.get('ESContactNumberExt')):
+            row_info.update({'emergency_contact2': '%s%s%s' % (COUNTRY_CODE, row.get('ESContactNumberExt'),
+                                                               row.get('ESContactNumber'))})
 
 
-    print "**** ", row_info
-    call_record = SOTSCallRecord(**row_info)
-    call_record.save()
+        call_record = SOTSCallRecord(**row_info)
+        call_record.save()
+    except:
+        print "an error occured for ", row
     #import pdb;pdb.set_trace()
 

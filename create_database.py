@@ -21,7 +21,7 @@ records = SOTSCallRecord.objects.all()
 records.delete()
 for row in reader:
     if int(row.get('FamilyID')):
-	continue
+       continue
     row_info = {
         'ssrecid': int(row.get('SSRecID')),
         'familyid': int(row.get('FamilyID')),

@@ -28,6 +28,11 @@ class SOTSadmin(models.Model):
     class Meta:
          verbose_name = "SOTS Admin"
 
+    class Migration:
+        needed_by = (
+            ('authtoken', '0001_initial'),
+        )
+
 # SOTS Call Records
 class SOTSCallRecord(models.Model):
     ssrecid = models.IntegerField(primary_key=True, db_index=True)#number

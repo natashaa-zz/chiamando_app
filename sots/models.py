@@ -102,7 +102,9 @@ class SOTSCallRecord(models.Model):
 @receiver(update_callrecord, sender=SOTSCallRecord)
 def on_update_callrecord_change_overall_status(sender, instance, **kwargs):
     familyid = instance.familyid
-    if instance.overall_status == 'I' and familyid:
-        records = sender.objects.filter(familyid=instance.familyid)
+    records = sender.objects.filter(familyid=instance.familyid)
+    if instance.overall_status == 'I':
         records.update(overall_status='I')
+    if familyid:
+        records.update(locked=instance.locked)
 
